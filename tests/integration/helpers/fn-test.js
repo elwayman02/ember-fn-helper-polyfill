@@ -204,7 +204,7 @@ module('Integration | Helper | fn', function(hooks) {
     assert.dom().hasText('arg1: foo, arg2: bar, arg3: qux');
   });
 
-  test('can be used on the result of `mut`', async function(assert) {
+  test('can be used on the result of `mut` with an additional argument', async function(assert) {
     this.set('arg1', 'foo');
     this.set('arg2', 'bar');
 
@@ -215,5 +215,29 @@ module('Integration | Helper | fn', function(hooks) {
     run(this.stashedFn);
 
     assert.dom().hasText('bar');
+  });
+
+  test('can be used on the result of `mut`', async function(assert) {
+    this.set('arg1', 'foo');
+
+    await render(hbs`{{this.arg1}}{{x-stash stashedFn=(fn (mut this.arg1))}}`);
+
+    assert.dom().hasText('foo');
+
+    run(() => this.stashedFn('bar'));
+
+    assert.dom().hasText('bar');
+  });
+
+  test('can be used on the result of `mut` for boolean values', async function(assert) {
+    this.set('arg1', false);
+
+    await render(hbs`{{this.arg1}}<XStash @stashedFn={{fn (mut this.arg1)}}/>`);
+
+    assert.dom().hasText('false');
+
+    run(() => this.stashedFn(true));
+
+    assert.dom().hasText('true');
   });
 });
